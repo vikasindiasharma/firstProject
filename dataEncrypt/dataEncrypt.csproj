@@ -70,6 +70,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="bin\Debug\dataEncrypt.exe.config" />
+    <None Include="bin\Debug\data\log.29_12_2018_18_17_48" />
+    <None Include="out\Debug\dataEncrypt.exe.config" />
+    <None Include="out\Debug\data\log.29_12_2018_18_17_48" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -89,7 +93,15 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bin\Debug\dataEncrypt.exe" />
+    <Content Include="bin\Debug\dataEncrypt.pdb" />
+    <Content Include="bin\Debug\data\log_29_12_2018_18_24_23.txt" />
+    <Content Include="bin\Debug\data\recentfiles.txt" />
     <Content Include="data\logs.txt" />
+    <Content Include="out\Debug\dataEncrypt.exe" />
+    <Content Include="out\Debug\dataEncrypt.pdb" />
+    <Content Include="out\Debug\data\log_29_12_2018_18_24_23.txt" />
+    <Content Include="out\Debug\data\recentfiles.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
