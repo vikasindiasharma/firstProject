@@ -26,7 +26,9 @@ namespace dataEncrypt
 
         private void Form1_Load(object sender, EventArgs e)
         {
-          /*  AutoCompleteStringCollection source = new AutoCompleteStringCollection();
+          
+            
+            /*  AutoCompleteStringCollection source = new AutoCompleteStringCollection();
             // Add each item to the collection
             
 
@@ -72,12 +74,10 @@ namespace dataEncrypt
         EncryptionFile enc = new EncryptionFile();
         DecryptionFile dec = new DecryptionFile();
 
-        public void StarDecrypt(DataArgument argument, BackgroundWorker bwWorker)
+        public void StarDecrypt(DataArgument argument, BackgroundWorker bwWorker, string sourceDirectory, string DestinationDir)
         {
 
-            string[] files = Directory.GetFiles(argument.SourceFolder, "*", SearchOption.AllDirectories);
-
-
+            string[] files = Directory.GetFiles(sourceDirectory, "*", SearchOption.AllDirectories);
 
 
             string password = argument.Password;
@@ -86,7 +86,7 @@ namespace dataEncrypt
             {
                 argument.Message = String.Format("Processing DeEncrypt {0} of {1}, File {2}", (i + 1), files.Length, files[i]);
                 bwWorker.ReportProgress(0,argument);
-                string destinationFile = Path.Combine(txtDestination.Text, Path.GetFileName(files[i]));
+                string destinationFile = Path.Combine(DestinationDir, Path.GetFileName(files[i]));
                 if (File.Exists(destinationFile))
                 {
                     string copiedFile = destinationFile + (".org_" +  getCurrentDateTime());
@@ -113,12 +113,55 @@ namespace dataEncrypt
         }
     
 
-    public void StartEncrypt(DataArgument argument,BackgroundWorker bwWorker)
+        
+        private void StartDirectoryLevelProcess (string sourceDirectory ,  string DestinationDir, BackgroundWorker bwWorker, DataArgument argument)
+        {
+            string[] directories = Directory.GetDirectories(sourceDirectory);
+
+            
+            
+            try
+            {
+                foreach(string dir in directories)
+                {
+                    string dirName = Path.GetFileName(dir);
+                    string destination = Path.Combine(DestinationDir, dirName);
+
+                    if (! Directory.Exists(destination))
+                    {
+                        Directory.CreateDirectory(destination);
+                    }
+                    StartDirectoryLevelProcess(dir, destination, bwWorker, argument);
+
+                }
+
+                if (argument.Encrypt)
+                {
+                    StartEncrypt(argument, bwWorker, sourceDirectory, DestinationDir);
+                }
+                else
+                {
+                    StarDecrypt(argument, bwWorker, sourceDirectory, DestinationDir);
+                }
+
+
+            }
+            catch( Exception ex)
+            {
+                argument.Message = "Error " + ex.Message;
+                bwWorker.ReportProgress(0,argument);
+            }
+
+            
+
+
+
+
+        }
+    public void StartEncrypt(DataArgument argument,BackgroundWorker bwWorker, string sourceDirectory, string DestinationDir)
         {
 
-            string[] files = Directory.GetFiles(argument.SourceFolder, "*", SearchOption.AllDirectories);
-
-
+            string[] files = Directory.GetFiles(sourceDirectory, "*", SearchOption.TopDirectoryOnly);
 
 
             string password = argument.Password;
@@ -128,7 +171,7 @@ namespace dataEncrypt
                 argument.Message= String.Format("Processing Encrypt {0} of {1}, File {2}", (i+1), files.Length,files[i]);
 
                 bwWorker.ReportProgress(0, argument);
-                string destinationFile = Path.Combine(txtDestination.Text, Path.GetFileName( files[i]));
+                string destinationFile = Path.Combine(DestinationDir, Path.GetFileName( files[i]));
                 if ( File.Exists(destinationFile))
                 {
                     argument.Message= "Deleting Existing file " + destinationFile;
@@ -188,15 +231,15 @@ namespace dataEncrypt
         {
             var argument= e.Argument as DataArgument;
             BackgroundWorker helperBW = sender as BackgroundWorker;
-            if (argument.Encrypt)
+
+            string path = Path.Combine(argument.DestinationFolder, Path.GetFileName(argument.SourceFolder));
+
+            if (! Directory.Exists(path))
             {
-                StartEncrypt(argument, helperBW);
-            }
-            else
-            {
-                StarDecrypt(argument, helperBW);
+                Directory.CreateDirectory(path);
             }
 
+            StartDirectoryLevelProcess(argument.SourceFolder, path, helperBW, argument);
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
